@@ -20,7 +20,7 @@ app.get("/add", async (request, response) => {
 
 app.get("/*", async (request, response) => {
     let currentRoute = request.path.split("/")[1];
-    currentRoute = (currentRoute === "" ? "index" : currentRoute) + ".html";
+    currentRoute = (currentRoute === "" ? "index.html" : currentRoute);
     try{
       await fileSystemManager.checkFile(PUBLIC_PATH + currentRoute);
       response.sendFile(PUBLIC_PATH + currentRoute);
@@ -32,6 +32,6 @@ app.get("/*", async (request, response) => {
 });
 
 const server = app.listen(PORT, () => {
-    console.log(`Listening on port ${PORT}`);
+    console.log(`Listening on http://localhost:${PORT}`);
     dbService.connectToServer();
 });
