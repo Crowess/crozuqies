@@ -6,9 +6,11 @@ const DEFAULT_DATA = "default.json";
 const fs = new FileSystemManager();
 
 class DbManager {
-    constructor() {
+    constructor() {};
+
+    init = async function(){
         fs.checkFile(DB_FILE).catch(this.populateFile());
-        fs.readFile(DEFAULT_DATA)
+        await fs.readFile(DEFAULT_DATA)
         .then((defaultData) => JSON.parse(defaultData))
         .then((defaultData) => {
             fs.readFile(DB_FILE)
@@ -50,8 +52,16 @@ class DbManager {
     }
     
     get = async function(id, path){
-        console.log((await fs.readFile(DB_FILE).then((data) => JSON.parse(data))).players.find(player => player.id == id)[path]);
         return (await fs.readFile(DB_FILE).then((data) => JSON.parse(data))).players.find(player => player.id == id)[path];
+    }
+
+    getData = async function(){
+        return await fs.readFile(DB_FILE)
+        .then((data) => JSON.parse(data));
+    }
+
+    setData = async function(data){
+        await fs.writeToJsonFile(DB_FILE, JSON.stringify(data));
     }
 };
 

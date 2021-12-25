@@ -11,10 +11,10 @@ const PUBLIC_PATH = path.join(__dirname + "/client/");
 const fileSystemManager = new FileSystemManager();
 const dbManager = new DbManager();
 
-app.use((request, response, next) => {
-    console.log(`New HTTP request: ${request.method} ${request.url}`);
-    next();
-});
+// app.use((request, response, next) => {
+//     console.log(`New HTTP request: ${request.method} ${request.url}`);
+//     next();
+// });
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -49,6 +49,19 @@ app.get("/*", async (request, response) => {
     }
 });
 
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, async () => {
     console.log(`Listening on http://localhost:${PORT}`);
+    await dbManager.init();
+    periodicUpgrades();
 });
+
+async function periodicUpgrades(){
+    let data = await dbManager.getData();
+    data.players.forEach(element => {
+        element.triangles += 0.5;
+        element.rectangles++;
+    });
+    dbManager.setData(data);
+    setTimeout(periodicUpgrades, 1000);
+};
+
