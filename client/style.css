@@ -10,6 +10,16 @@ body {
     padding: 20px;
 }
 
+.tableau-magasin > div {
+    width: 200px;
+    border: 1px solid black;
+}
+
+.tableau-magasin > div > img{
+    width: 100%;
+    height: 100%;
+}
+
 .tableau-principal {
     display: grid;
     grid-template-columns: [colonne1] 75% [colonne2] 25%;
