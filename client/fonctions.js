@@ -1,7 +1,16 @@
 document.addEventListener("DOMContentLoaded", ready);
 
-function ready() {
+function post(url, data) {
+    return fetch(url, {method: "POST", headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data), credentials: "same-origin"});
+}
 
+let cookie = document.cookie;
+
+if (!cookie) {
+    document.cookie = "id = " + Math.floor(Math.random() * Math.floor(Math.random() * Date.now()));
+}
+
+async function ready() {
     var rectangle = document.getElementById("rectangleClickable");
     var triangle = document.getElementById("triangleClickable");
     var rectCount = document.getElementById("nbrRects");
@@ -16,17 +25,27 @@ function ready() {
         clickTriangle();
     });
 
-
-
     function clickRectangle() {
-        nbrRectangle++;
-        rectCount.innerHTML = nbrRectangle;
+        rectCount.innerHTML = parseInt(rectCount.innerHTML) + 1;
+        post("/add", {type: "rectangles"});
     }
     function clickTriangle() {
-        nbrTriangle++;
-        trigCount.innerHTML = nbrTriangle;
+        trigCount.innerHTML = parseInt(trigCount.innerHTML) + 1;
+        post("/add", {type: "triangles"});
     }
-    
 
-
+    async function update() {
+        fetch("/triangles", {method: "GET", headers: {'Content-Type': 'application/json'}})
+        .then((data) => data.json())
+        .then((data) => {
+            trigCount.innerHTML = data.amt;
+        });
+        fetch("/rectangles", {method: "GET", headers: {'Content-Type': 'application/json'}})
+        .then((data) => data.json())
+        .then((data) => {
+            rectCount.innerHTML = data.amt;
+        });
+        setTimeout(update, 1000);
+    }
+    update();
 }
