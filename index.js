@@ -62,6 +62,6 @@ async function periodicUpgrades(){
         element.rectangles++;
     });
     dbManager.setData(data);
-    setTimeout(periodicUpgrades, 1000);
+    setTimeout(() => periodicUpgrades(), 1000);
 };
 

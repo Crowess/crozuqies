@@ -1,67 +1,51 @@
 const { FileSystemManager } = require("./file_system_manager");
 
 const DB_FILE = "db.json";
-const DEFAULT_DATA = "default.json";
+const DB_UPDATE_TIME = 60000;
 
 const fs = new FileSystemManager();
 
 class DbManager {
     constructor() {};
 
+    populateFile = async function(){
+        console.log("file was populated");
+        await fs.writeToJsonFile(DB_FILE, JSON.stringify({players: []}));
+    };
+
     init = async function(){
-        fs.checkFile(DB_FILE).catch(this.populateFile());
-        await fs.readFile(DEFAULT_DATA)
-        .then((defaultData) => JSON.parse(defaultData))
-        .then((defaultData) => {
-            fs.readFile(DB_FILE)
-            .then((data) => JSON.parse(data))
-            .then((data) => {
-                data.upgrades = defaultData.upgrades;
-                return data;
-            })
-            .then((data) => {
-                fs.writeToJsonFile(DB_FILE, JSON.stringify(data))
-            });
-        });
+        await fs.checkFile(DB_FILE).catch(async () => await this.populateFile());
+        this.data = await fs.readFile(DB_FILE).then(data => JSON.parse(data));
+        this.updateDb();
+    };
+
+    updateDb = async function(){
+        fs.writeToJsonFile(DB_FILE, JSON.stringify(this.data));
+        console.log("updated");
+        setTimeout(() => this.updateDb(), DB_UPDATE_TIME);
     };
     
     createPlayer = async function(id){
-        await fs.readFile(DB_FILE)
-        .then((data) => JSON.parse(data))
-        .then((data) => {
-            if (data.players.filter(player => player.id == id).length == 0){
-                data.players.push({id : id, triangles : 0, rectangles : 0});
-                fs.writeToJsonFile(DB_FILE, JSON.stringify(data));
-            }
-        });
-    };
-
-    populateFile = async function(){
-        fs.readFile(DEFAULT_DATA)
-            .then((defaultData) => fs.writeToJsonFile(DB_FILE, defaultData));
+        if (this.data.players.find(player => player.id == id) == undefined)
+            this.data.players.push({id: id});
     };
     
     add = async function(id, body){
-        fs.readFile(DB_FILE)
-        .then((data) => JSON.parse(data))
-        .then((data) => {
-            data.players.find(player => player.id == id)[body.type] += 1;
-            return data;
-        })
-        .then((data) => fs.writeToJsonFile(DB_FILE, JSON.stringify(data)));
+        this.data.players.find(player => player.id == id)[body.type] += 1;
     }
     
     get = async function(id, path){
-        return (await fs.readFile(DB_FILE).then((data) => JSON.parse(data))).players.find(player => player.id == id)[path];
+        if (!this.data.players.find(player => player.id == id)[path])
+            this.data.players.find(player => player.id == id)[path] = 0;
+        return this.data.players.find(player => player.id == id)[path];
     }
 
     getData = async function(){
-        return await fs.readFile(DB_FILE)
-        .then((data) => JSON.parse(data));
+        return this.data
     }
 
     setData = async function(data){
-        await fs.writeToJsonFile(DB_FILE, JSON.stringify(data));
+        this.data = data;
     }
 };
 
